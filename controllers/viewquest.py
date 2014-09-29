@@ -1,14 +1,20 @@
 # - Coding UTF8 -
 #
 # Networked Decision Making
-# Site: http://code.google.com/p/global-decision-making-system/
+# Development Sites (source code): 
+#   http://code.google.com/p/global-decision-making-system/
+#   http://github.com/NewGlobalStrategy/NetDecisionMaking
 #
-# License Code: GPL, General Public License v. 2.0
+# Demo Sites (Google App Engine)
+#   http://netdecisionmaking.appspot.com
+#   http://globaldecisionmaking.appspot.com
+#
+# License Code: MIT
 # License Content: Creative Commons Attribution 3.0
 #
 # Also visit: www.web2py.com
-# or Groups: http://groups.google.com/group/web2py 
-# 	For details on the web framework used for this development
+# or Groups: http://groups.google.com/group/web2py
+# For details on the web framework used for this development
 #
 # Developed by Russ King (newglobalstrategy@gmail.com
 # Russ also blogs occasionally to pass the time at: 

@@ -45,11 +45,12 @@ else:
     from gluon.contrib.memdb import MEMDB
     from google.appengine.api.memcache import Client
     session.connect(request, response, db = MEMDB(Client()))
-
+    #session.connect(request, response, db = db)
 
 ## by default give a view/generic.extension to all actions from localhost
 ## none otherwise. a pattern can be 'controller/function.extension'
-response.generic_patterns = ['*'] if request.is_local else []
+#response.generic_patterns = ['*'] if request.is_local else []
+response.generic_patterns = ['*']
 response.formstyle = 'bootstrap3_inline'  # or 'bootstrap3_stacked'
 #response.formstyle = 'bootstrap3_stacked'
 ## (optional) optimize handling of static files
@@ -89,7 +90,9 @@ auth.settings.extra_fields['auth_user'] = [
           comment='Std user+avator, extreme is id only'),
     Field('avatar', 'upload'),
     Field('avatar_thumb', 'upload', compute=lambda r: generate_thumbnail(r['avatar'], 120, 120, True)),
-    Field('show_hints', 'boolean', default= True, label='Show hints')]
+    Field('show_help','boolean',default=True,label='Show help')]
+
+
 
 ## create all tables needed by auth if not custom tables
 auth.define_tables(username=True)

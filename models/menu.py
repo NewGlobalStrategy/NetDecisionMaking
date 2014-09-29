@@ -24,7 +24,8 @@ response.google_analytics_id = None
 #  [('Search', False, URL('search', 'index'))]),
 
 response.menu = [
-    ('Home', False, URL('default', 'index')),
+    ('Home', False, URL('default', 'index'),
+     [('Search', False, URL('search', 'newsearch'))]),
     ('Create', False, URL('submit', 'new_question', args=['quest']),
      [('Create Question', False, URL('submit', 'new_question', args=['quest'])),
       ('Create Action', False, URL('submit', 'new_question', args=['action'])),

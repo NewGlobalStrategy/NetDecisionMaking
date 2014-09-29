@@ -1,9 +1,15 @@
 # - Coding UTF8 -
 #
 # Networked Decision Making
-# Site: http://code.google.com/p/global-decision-making-system/
+# Development Sites (source code): 
+#   http://code.google.com/p/global-decision-making-system/
+#   http://github.com/NewGlobalStrategy/NetDecisionMaking
 #
-# License Code: GPL, General Public License v. 2.0
+# Demo Sites (Google App Engine)
+#   http://netdecisionmaking.appspot.com
+#   http://globaldecisionmaking.appspot.com
+#
+# License Code: MIT
 # License Content: Creative Commons Attribution 3.0
 #
 # Also visit: www.web2py.com
@@ -11,9 +17,12 @@
 # For details on the web framework used for this development
 #
 # Developed by Russ King (newglobalstrategy@gmail.com
-# Russ also blogs occasionally at proudofyourplanent.blogspot.com
-# His general thinking on why this project is very important is availalbe at
+# Russ also blogs occasionally to pass the time at: 
+# http://proudofyourplanent.blogspot.com
+# His general thinking on why this project is very important is available at
 # http://www.scribd.com/doc/98216626/New-Global-Strategy
+# With thanks to Guido, Massimo and many other that make this sort of thing
+# much easier than it used to be
 #
 # This will be an initial contoller for displaying networks of questions
 # current thinking is that layout will be managed server side and jointjs

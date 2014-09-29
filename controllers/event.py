@@ -1,14 +1,20 @@
 # - Coding UTF8 -
 #
 # Networked Decision Making
-# Site: http://code.google.com/p/global-decision-making-system/
+# Development Sites (source code): 
+#   http://code.google.com/p/global-decision-making-system/
+#   http://github.com/NewGlobalStrategy/NetDecisionMaking
 #
-# License Code: GPL, General Public License v. 2.0
+# Demo Sites (Google App Engine)
+#   http://netdecisionmaking.appspot.com
+#   http://globaldecisionmaking.appspot.com
+#
+# License Code: MIT
 # License Content: Creative Commons Attribution 3.0
 #
 # Also visit: www.web2py.com
 # or Groups: http://groups.google.com/group/web2py
-# 	For details on the web framework used for this development
+# For details on the web framework used for this development
 #
 # Developed by Russ King (newglobalstrategy@gmail.com
 # Russ also blogs occasionally to pass the time at: 
@@ -17,6 +23,7 @@
 # http://www.scribd.com/doc/98216626/New-Global-Strategy
 # With thanks to Guido, Massimo and many other that make this sort of thing
 # much easier than it used to be
+
 # This controller has 3 functions:
 # my_questions for reviewing progress on questions you have asked
 # my_answers for reviewing your answers
@@ -212,6 +219,7 @@ def eventaddquests():
     query = (db.question.eventid == eventid) & (db.question.qtype == 'quest')
     sortby = ~db.question.createdate
     items_per_page = 20
+
     limitby = (page * items_per_page, (page + 1) * items_per_page + 1)
 
     quests = db(query).select(
@@ -259,8 +267,9 @@ def eventaddquests():
 
 
 def vieweventmap():
-    #This will now have a load option for the sidebar based on query on default.py but can test specific first
-    #issues are probably need to put the scale into request.args I think
+    #This now has a load option and works fine when events are setup - however the redirect is a problem if no events
+    #as then loads with another layout html and thing fails badly possibly better to change to just return message if
+    #no selection for now
 
     eventid = 0
     grwidth = 800
@@ -269,6 +278,7 @@ def vieweventmap():
     FIXHEIGHT = 600
 
     resultstring = ''
+    gotevent=True
 
     if len(request.args) and int(request.args[0]) > 0:
         eventid = int(request.args[0])
@@ -281,7 +291,8 @@ def vieweventmap():
         if events:
             eventid = events.id
         else:
-            redirect(URL('index'))
+            response.view = 'noevent.load'
+            return dict(resultstring='No Event')
 
     if len(request.args) > 2:
         grwidth = int(request.args[1])
@@ -300,8 +311,8 @@ def vieweventmap():
 
     questlist = [x.id for x in quests]
     if not questlist:
-        resultstring = 'no quests'
-        redirect(URL('index'))
+            response.view = 'noevent.load'
+            return dict(resultstring='No Event')
 
     parentlist = questlist
     childlist = questlist

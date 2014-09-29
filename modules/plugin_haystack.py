@@ -21,6 +21,11 @@ print db(query).select()
 import re
 import os
 from gluon import Field
+try:
+    from google.appengine.api import search
+except ImportError:
+    #raise ImportError("Cannot find appengine search")
+    pass
 
 DEBUG = False
 
@@ -43,8 +48,8 @@ class SimpleBackend(object):
         return self
 
     def after_insert(self, fields, id):
-        if DEBUG: print
-        'after insert', fields, id
+        if DEBUG:
+            print 'after insert', fields, id
         for fieldname in self.fieldnames:
             words = set(self.regex.findall(fields[fieldname].lower())) - self.ignore
             for word in words:
@@ -52,8 +57,8 @@ class SimpleBackend(object):
                     fieldname=fieldname,
                     keyword=word,
                     record_id=id)
-        if DEBUG: print
-        self.db(self.idx).select()
+        if DEBUG:
+            print self.db(self.idx).select()
         return True
 
     def after_update(self, queryset, fields):
@@ -181,7 +186,6 @@ class WhooshBackend(SimpleBackend):
                     ids = new_ids if ids is None else ids | new_ids
         return list(ids)
 
-
 class SolrBackend(SimpleBackend):
     def __init__(self, table, url="http://localhost:8983", schema_filename="schema.xml"):
         self.table = table
@@ -245,11 +249,73 @@ class SolrBackend(SimpleBackend):
         ids = [r['id'] for r in results]
         return ids
 
+class GAEBackend(SimpleBackend):
+    def __init__(self, table):
+        self.table = table
+
+    def indexes(self, *fieldnames):
+        #fieldnames are not actually used in this function but setup this way for consistency
+        #with other backends
+        self.fieldnames = fieldnames
+        self.index = search.Index(name=self.table._tablename)
+
+    def after_insert(self, fields, id):
+        if DEBUG:
+            print 'after insert', fields, id
+        fieldlist=[]
+        for fieldname in self.fieldnames:
+            #fieldlist.append(name=fieldname, fields[fieldname]),
+            #this is a bit crude - setting everything as htmal field regardless of type
+            #may need some sort of extra field value on table to set the types you want to do this properly
+            fieldvalue = search.HtmlField(name=fieldname, value=fields[fieldname])
+            fieldlist.append(fieldvalue)
+        strid = self.table._tablename + '.' + str(id)
+        my_document = search.Document(doc_id = strid, fields = fieldlist)
+        add_result = self.index.put(my_document)
+        if DEBUG:
+            pass
+        return True
+
+    def after_update(self, queryset, fields):
+        pass
+        return True
+
+    def after_delete(self, queryset):
+        if DEBUG:
+            print 'after delete', queryset
+        ids = self.get_ids(queryset)
+        for x in ids:
+            strid = self.table._tablename + '.' + str(id)
+            self.index.remove(strid)
+        if DEBUG:
+            pass
+        return True
+
+    def meta_search(self, limit, mode, **fieldkeys):
+        query = ''
+        for fieldname in fieldkeys:
+            if fieldname:
+                query += ' ' + fieldkeys[fieldname]
+        ids=[]
+        try:
+            #search_results = self.index.search(query) # format for query string
+            search_query = search.Query(query_string=query, options=search.QueryOptions(
+            limit=limit))
+            search_results = self.index.search(search_query) #format with query object
+            #returned_count = len(search_results.results)
+            #number_found = search_results.number_found
+            fullids = [str(doc.doc_id) for doc in search_results]
+            ids = [docid[docid.index('.')+1:] for docid in fullids if docid.index('.') > 0]
+        except:
+            pass
+
+        return ids
 
 class Haystack(object):
     def __init__(self, table, backend=SimpleBackend, **attr):
         self.table = table
         self.backend = backend(table, **attr)
+
 
     def indexes(self, *fieldnames):
         invalid = [f for f in fieldnames if not f in self.table.fields() or
@@ -267,7 +333,6 @@ class Haystack(object):
     def search(self, limit=20, mode='and', **fieldkeys):
         ids = self.backend.meta_search(limit, mode, **fieldkeys)
         return self.table._id.belongs(ids)
-
 
 def test(mode='simple'):
     db = DAL()

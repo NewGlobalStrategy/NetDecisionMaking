@@ -1,9 +1,15 @@
 # - Coding UTF8 -
 #
 # Networked Decision Making
-# Site: http://code.google.com/p/global-decision-making-system/
+# Development Sites (source code): 
+#   http://code.google.com/p/global-decision-making-system/
+#   http://github.com/NewGlobalStrategy/NetDecisionMaking
 #
-# License Code: GPL, General Public License v. 2.0
+# Demo Sites (Google App Engine)
+#   http://netdecisionmaking.appspot.com
+#   http://globaldecisionmaking.appspot.com
+#
+# License Code: MIT
 # License Content: Creative Commons Attribution 3.0
 #
 # Also visit: www.web2py.com
@@ -17,6 +23,7 @@
 # http://www.scribd.com/doc/98216626/New-Global-Strategy
 # With thanks to Guido, Massimo and many other that make this sort of thing
 # much easier than it used to be
+
 # This controller has 3 functions:
 # my_questions for reviewing progress on questions you have asked
 # my_answers for reviewing your answers

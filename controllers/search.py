@@ -1,19 +1,28 @@
 # - Coding UTF8 -
 #
 # Networked Decision Making
-# Site: http://code.google.com/p/global-decision-making-system/
+# Development Sites (source code): 
+#   http://code.google.com/p/global-decision-making-system/
+#   http://github.com/NewGlobalStrategy/NetDecisionMaking
 #
-# License Code: GPL, General Public License v. 2.0
+# Demo Sites (Google App Engine)
+#   http://netdecisionmaking.appspot.com
+#   http://globaldecisionmaking.appspot.com
+#
+# License Code: MIT
 # License Content: Creative Commons Attribution 3.0
 #
 # Also visit: www.web2py.com
 # or Groups: http://groups.google.com/group/web2py
-# 	For details on the web framework used for this development
+# For details on the web framework used for this development
 #
 # Developed by Russ King (newglobalstrategy@gmail.com
-# Russ also blogs occasionally at proudofyourplanent.blogspot.com
-# His general thinking on why this project is very important is availalbe at
+# Russ also blogs occasionally to pass the time at: 
+# http://proudofyourplanent.blogspot.com
+# His general thinking on why this project is very important is available at
 # http://www.scribd.com/doc/98216626/New-Global-Strategy
+# With thanks to Guido, Massimo and many other that make this sort of thing
+# much easier than it used to be
 #
 # search is now using the haystack plugin and generating a full text index on question text only
 # which we might add a capabilty to filter by action or question
@@ -26,45 +35,11 @@
 # which probably needs a bit of further understanding on my part
 # and then a second one to get the questions which would have pagination I think
 #
-# pagination to be added here and link to viewquestion from the view - should be easy
+# pagination to be added here at some point but currently search limit of 20 and refine search will do
 
-
-def index():
-    return dict()
-
-
-def search():
-
-    fields = ['searchstring']
-
-    form = SQLFORM(db.viewscope, fields=fields)
-
-    if form.validate():
-        redirect(URL('search', 'haystack', args=[request.vars.searchstring]))
-
-    return dict(form=form)
-
-
-def quick():
-    response.view = 'search/index.html'
-    term = request.vars.keyword
-    #so think this needs to be different on GAE - suck all to python and then search
-    #that would do for now and question text to related ids is all we need to search
-    # so maybe haystack plugin with fix for contains is still the way to go
-
-    topic_search = db(db.question.questiontext.contains(term)).select()
-    count = db(db.question.questiontext.contains(term)).count()
-
-    #topic_search=db(db.question.id>0).select(db.question.questiontext).find(
-    #    lambda row:row.questiontext.find(term))
-    #count=len(topic_search)
-    return dict(results=topic_search, count=count)
-
-
-def haystack():
-    response.view = 'search/search.html'
+def newsearch():
     #term = request.args[0]
-    term = request.vars.keyword
+    #term = request.vars.keyword
 
     #fields= ['searchstring','sortorder','showscope','scope', 'continent','country',
     #         'subdivision','showcat','category']
@@ -72,20 +47,12 @@ def haystack():
     fields = ['searchstring']
 
     form = SQLFORM(db.viewscope, fields=fields)
+    results = None
 
     if form.validate():
-        redirect(URL('search', 'haystack', args=[request.vars.searchstring]))
+        query = indsearch.search(questiontext=form.vars.searchstring)
 
-    query = indsearch.search(questiontext=term)
-
-    #this now works thinking is that additional filters could kick in here
-    #rather than add them to full text search to give combination - concern is that may need to recall search if 
-    #first one gets everything fltered out and no longer a two query process 
-    #would also like the filter selection as a plugin with associated script file to do 
-    #the showing and hiding - as all based on viewscope this may be possible or perhaps thats a block
-    #in the view not a plugin
-
-    results = db(query).select(db.question.id, db.question.status, db.question.questiontext,
+        results = db(query).select(db.question.id, db.question.status, db.question.questiontext,
                                db.question.correctanstext, db.question.category, db.question.activescope,
                                db.question.qtype, db.question.resolvedate, db.question.createdate, db.question.priority,
                                orderby=db.question.status)

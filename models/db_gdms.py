@@ -19,7 +19,7 @@
 
 import datetime
 from plugin_hradio_widget import hradio_widget
-#from plugin_haystack import Haystack
+from plugin_haystack import Haystack, SimpleBackend, GAEBackend
 
 not_empty = IS_NOT_EMPTY()
 
@@ -76,8 +76,16 @@ db.define_table('question',
                 Field('numcomments', 'integer', default=0, writable=False,
                       label='# of comments'), )  # numcomments not yet used
 
-#indsearch = Haystack(db.question)  # table to be indexed
-#indsearch.indexes('questiontext')
+if request.env.web2py_runtime_gae:
+    indsearch = Haystack(db.question, backend=GAEBackend)  # table to be indexed
+    indsearch.indexes('questiontext','category') # lets go with this for now - some issues here but
+                                                            #  questiontext never changes and category rarely and can do
+                                                            #  defined update if it does answertext didnt work as not
+                                                            # part of fieldset when record created
+else:
+    indsearch = Haystack(db.question)
+    indsearch.indexes('questiontext','category')
+
 
 db.question.category.requires = IS_IN_SET(settings.categories)
 db.question.continent.requires = IS_IN_SET(settings.continents)

@@ -168,9 +168,6 @@ db.define_table('event',
                 Field('owner', 'reference auth_user', writable=False, readable=False, default=auth.user_id,
                       label='Owner'),
                 Field('createdate', 'datetime', default=request.utcnow, writable=False, readable=False),
-                Field('eventquestids', 'list:integer', writable=False, readable=False),
-                Field('eventquestposx', 'list:integer', writable=False, readable=False),
-                Field('eventquestposy', 'list:integer', writable=False, readable=False),
                 format='%(event_name)s')
 
 #, default = db(db.location.locationname == 'Unspecified').select(db.location.id).first().id

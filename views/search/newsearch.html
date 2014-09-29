@@ -3,42 +3,7 @@
 
 {{=form}}
 
-{{if request.function=='quick':}}
-<h2>{{=T('Search results')}}</h2>
-      <table width="100%" class="table-block">
-        {{if count>0:}}
-        <tr>
-            <th>{{=T('Type')}}</th>
-            <th>{{=T('Question')}}</th>
-            <th>{{=T('Answer/Status')}}</th>
-            <th>{{=T('Created/Resolved')}}</th>
-            <th>{{=T('Scope')}}</th>
-            <th>{{=T('Category')}}</th>
-            <th>{{=T('Priority')}}</th>
-        </tr>
-        {{pass}}
-        {{if count>0:}}
-        {{for row in results:}}
-    	<tr>
-            <td><a href="{{=URL('viewquest','index',args=[row.id])}}">{{=row.qtype}}</a></td>
-        	<td width="350">{{=row.questiontext}}</td>
-            <td>{{=row.status}}{{=row.correctanstext}}</td>
-            <td>{{=row.resolvedate}}{{=row.createdate}}</td>
-        	<td width="100">{{=row.activescope}}</td>
-            <td width="100">{{=row.category}}</td>
-            <td width="100">{{=row.priority}}</td>
-        </tr>
-        {{pass}}
-        {{else:}}
-        <tr>
-            <td>{{=T('There are no topics yet found in this search.')}}</td>
-        </tr>
-        {{pass}}
-    </table>
-{{pass}}
-
-
-{{if request.function=='haystack':}}
+{{if results:}}
 <h2>{{=T('Search results')}}</h2>
       <table width="100%" class="table-block">
         {{if count>0:}}
