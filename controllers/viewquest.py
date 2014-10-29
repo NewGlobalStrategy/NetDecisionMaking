@@ -89,6 +89,7 @@ def index():
         quest = questrow.as_dict()
 
     if quest['qtype'] == 'quest':
+        response.view = 'viewquest/question.html'
         #View question logic 
         if auth.user is None:
             if quest['status'] != 'Resolved':
@@ -161,7 +162,7 @@ def index():
     else:  # action
         #Get details of the action urgency and importance of actions is stored in a different table because they can
         #be prioritised without answering
-
+        response.view = 'viewquest/action.html'
         if auth.user is not None:
             uq = db((db.questurgency.auth_userid == auth.user.id) & (
                 db.questurgency.questionid == questid)).select(db.questurgency.urgency,
@@ -451,7 +452,10 @@ def useranswers():
 
 def notshowing():
     shortreason = request.args[0]
-    questid = request.args[1]
+    if len(request.args) > 1:
+        questid = request.args[1]
+    else:
+        questid = False
 
     if shortreason == 'NotResolved':
         reason = "This question is not yet resolved and you haven't answered it"
@@ -518,7 +522,7 @@ def agree():
 
     responsetext = 'na'
     chquestid = request.args[0]
-    agree = int(request.args[1])
+    agreeval = int(request.args[1])
     if auth.user == None:
         responsetext = 'You must be logged in to record agreement or disagreement'
     else:
@@ -536,25 +540,25 @@ def agree():
 
         if qc == None:
             db.questagreement.insert(questionid=chquestid,
-                                     auth_userid=auth.user.id, agree=agree)
+                                     auth_userid=auth.user.id, agree=agreeval)
             #Now also need to add 1 to the numagreement or disagreement figure 
             #It shouldn't be possible to challenge unless resolved
 
-            if agree == 1:
+            if agreeval == 1:
                 numagree += 1
                 responsetext = 'Agreement Recorded'
             else:
                 numdisagree += 1
                 responsetext = 'Disagreement Recorded'
         else:
-            if agree == qc.agree:
-                if agree == 1:
+            if agreeval == qc.agree:
+                if agreeval == 1:
                     responsetext = 'You have already registered agreement'
                 else:
                     responsetext = 'You have already registered your disagreement'
                     ' - you may be able to challenge'
             else:
-                if agree == 1:
+                if agreeval == 1:
                     responsetext = 'Your vote has been changed to agreement'
                     numagree += 1
                     numdisagree -= 1
@@ -562,7 +566,7 @@ def agree():
                     responsetext = 'Your vote has been changed to disagreement'
                     numagree += 1
                     numdisagree -= 1
-                qc.update_record(agree=agree)
+                qc.update_record(agree=agreeval)
 
         db(db.question.id == chquestid).update(numagree=numagree,
                                                numdisagree=numdisagree)
@@ -661,19 +665,16 @@ def urgency():
         else:
             totratings = quest.totratings
 
-        urgency = (((quest.urgency * totratings) + urgslider) /
+        urgent = (((quest.urgency * totratings) + urgslider) /
                    (totratings + 1))
         importance = (((quest.importance * totratings) + impslider) /
                       (totratings + 1))
 
         if qc is None:
             totratings += 1
-        priority = urgency * importance  # perhaps a bit arbitary but will do for now
+        priority = urgent * importance  # perhaps a bit arbitary but will do for now
 
-        db(db.question.id == chquestid).update(urgency=urgency,
+        db(db.question.id == chquestid).update(urgency=urgent,
                                                importance=importance, priority=priority, totratings=totratings)
 
     return responsetext
-
-
-

@@ -7,7 +7,7 @@
 {{if v=='action':}}
 
 {{if quests:}}
-<table id='TabActions' class='table table-condensed table-responsive table-bordered'>
+<table id='TabActions' class='table issuetable2 table-bordered table-condensed'>
 				<thead>
 					<tr>
 						<th width="5%">Status</th>
@@ -21,7 +21,7 @@
                     <tbody>
 {{for i,row in enumerate(quests):}}
 {{if i==items_per_page: break}}
-<tr class={{if row.status == 'In Progress':}}"actinprog"{{else:}}"warning"{{pass}}>
+<tr class={{if row.status == 'In Progress':}}"actinprog"{{else:}}"actresolved"{{pass}}>
 <th><a title="{{=row.status}}" href="{{=URL('viewquest','index',args=[row.id])}}">{{=row.status[0]}}</a></th>
 <td>{{=truncquest(row.questiontext)}}</td>
 <td>{{=row.responsible}}</td>
@@ -41,7 +41,7 @@
 
 {{else:}}
 {{if quests:}}
-<table id='Tabquestions' class='table table-condensed table-responsive table-bordered'>
+<table id='Tabquestions' class='table issuetable2 table-bordered table-condensed'>
 				<thead>
 					<tr>
 						<th width="5%">Level</th>
@@ -54,7 +54,7 @@
                     <tbody>
 {{for i,row in enumerate(quests):}}
 {{if i==items_per_page: break}}
-<tr class={{if row.status == 'In Progress':}}"info"{{else:}}"resquest"{{pass}}>
+<tr class={{if row.status == 'In Progress':}}"inprog"{{else:}}"resolved"{{pass}}>
 <th><a href="{{=URL('viewquest','index',args=[row.id])}}">{{=row.level}}</a></th>
 <td>{{=truncquest(row.questiontext)}}</td>
 <td>{{=row.correctanstext}}</td>
@@ -72,11 +72,11 @@
 {{pass}}
 
 {{if page:}}
-<INPUT TYPE=BUTTON class="btn btn-primary btn-sm" onClick="parent.location='{{=URL(args=[v,q,s,page-1])}}'" VALUE="Previous">
+<INPUT TYPE=BUTTON class="btn btn-primary btn-sm" onClick="parent.location='{{=URL(args=[v,q,s,page-1])}}'"> <span class =" glyphicon glyphicon-star"> </span>  Previous</button>
 {{pass}}
 
 {{if len(quests)>items_per_page:}}
-<INPUT TYPE=BUTTON class="btn btn-primary btn-sm" onClick="parent.location='{{=URL(args=[v,q,s,page+1])}}'" VALUE="Next">
+<INPUT TYPE=BUTTON class="btn btn-primary btn-sm"  onClick="parent.location='{{=URL(args=[v,q,s,page+1])}}'" VALUE="Next">
 
 {{pass}}
 

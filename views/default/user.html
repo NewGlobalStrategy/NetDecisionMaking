@@ -3,20 +3,22 @@
 <p>This system requires all registrations to be approved by an administrator prior to granting full access.  You will receive an email advising when your registration has been approved.  Up until that point you will not be able to submit or answer questions. </p>
 {{pass}}
 
+  {{if request.args(0)=='login':}}
+  {{if not 'register' in auth.settings.actions_disabled:}}
+
+  <a class="btn btn-primary btn-sm btn-group-sm" role="button" href="{{=URL(args='register')}}">{{=T('Register')}} </a>
+  {{pass}}
+  {{if not 'request_reset_password' in auth.settings.actions_disabled:}}
+
+  <a class="btn btn-primary btn-sm btn-group-sm" role="button" href="{{=URL(args='request_reset_password')}}">{{=T('Lost Password')}} </a>
+  {{pass}}
+  {{pass}}
+
 
 <h1>{{=T( request.args(0).replace('_',' ').capitalize() )}}</h1>
 <div id="web2py_user_form">
   {{=form}}
-  {{if request.args(0)=='login':}}
-  {{if not 'register' in auth.settings.actions_disabled:}}
 
-  <a class="btn btn-primary btn-sm" role="button" href="{{=URL(args='register')}}">{{=T('Register')}} </a>
-  {{pass}}
-  {{if not 'request_reset_password' in auth.settings.actions_disabled:}}
-
-  <a class="btn btn-primary btn-sm" role="button" href="{{=URL(args='request_reset_password')}}">{{=T('Lost Password')}} </a>
-  {{pass}}
-  {{pass}}
 </div>
 {{if request.args(0)=='register':}}
 <p>Note: We appreciate that asking for registration is a bit of a pain and working 3rd party methods on this site are rather limited.  An alternative site with google authentication is available at <a href="http://globaldecisionmaking.appspot.com">globaldecisionmaking.appspot.com.</a></p>

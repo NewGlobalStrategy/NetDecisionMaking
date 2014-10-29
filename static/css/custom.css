@@ -38,9 +38,11 @@ li {text-align:left;}
     background-color: rgba(32, 208, 32, .15); 
 }
 
+.actresolved {
+    background-color: rgba(32, 208, 32, .15);
+}
 
-
-.inprogress {
+.inprog {
     background-color: rgba(255, 180, 0, .05);
 }
 
@@ -76,7 +78,7 @@ input[type=range]::-webkit-slider-runnable-track {
 }
 
 input[type=range]::-moz-range-track {
-    width: 180px;
+    width: 270px;
     height: 10px;
     background: #ddd;
     border: none;

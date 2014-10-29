@@ -14,7 +14,7 @@
                     <tbody>
 {{for i,row in enumerate(quests):}}
 {{if i==items_per_page: break}}
-<tr class={{if row.status == 'In Progress':}}"inprog"{{else:}}"resquest"{{pass}}>
+<tr class={{if row.status == 'In Progress':}}"inprog"{{else:}}"resolved"{{pass}}>
 <th>{{=A(row.level,_href=URL('viewquest','index',args=[row.id],extension='html'))}}</th>
 <td>{{=truncquest(row.questiontext)}}</td>
 <td>{{if row.status == 'In Progress':}} <INPUT TYPE=BUTTON onClick="parent.location='{{=URL('answer','answer_question/'+str(row.id),extension='html')}}'" VALUE="Answer">{{else:}} {{=row.correctanstext}}{{pass}}</td>
@@ -33,7 +33,7 @@
 {{=A('next',callback=URL(vars=dict(page=page+1)),target="questload", _class="btn btn-primary btn-sm", _role="button")}}
 {{pass}}
 {{else:}}
-<table class='table issuetable2 table-bordered table-condensed'>
+<table class='table  table-bordered table-condensed issuetable2'>
  <tr>
   <th width="10%">Level
   </th>
@@ -44,7 +44,7 @@
  </tr>
 {{for i,row in enumerate(quests):}}
 {{if i==items_per_page: break}}
- <tr class="inprogress">
+ <tr class="inprog">
   <th>{{=A(row.level,_href=URL('viewquest','index',args=[row.id],extension='html'))}}
   </th>
   <td>

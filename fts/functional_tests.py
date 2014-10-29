@@ -11,8 +11,8 @@ import sys
 import os.path
 
 #ROOT = 'http://localhost:8081/gdms'
-#ROOT = 'http://localhost:8082/gdms'
-ROOT = 'http://testdecisionmaking.appspot.com/gdms'
+ROOT = 'http://localhost:8081/test1'
+#ROOT = 'http://testdecisionmaking.appspot.com/gdms'
 #ROOT = 'http://testgdms.appspot.com/gdms'
 
 STARTSERVER = False

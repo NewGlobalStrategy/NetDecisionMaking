@@ -49,14 +49,15 @@ def index():
     #Move subject table to website parameters - think how this fits in though
     #think this should be done elsewhere
     #subj = db(db.subject.id>0).select(db.subject.longdesc).first()
-    if WEBSITE_PARAMETERS:
+    if INIT:
         pass
     else:
         redirect(URL('admin', 'init'))
 
     response.title = "Net Decision Making"
 
-    return dict(title=response.title)
+    WEBSITE_PARAMETERS = db(db.website_parameters).select(cache=(cache.ram, 1200), cacheable=True).first()
+    return dict(title=response.title, WEBSITE_PARAMETERS=WEBSITE_PARAMETERS)
 
 
 def questload():
@@ -90,6 +91,8 @@ def questload():
         if request.vars.query == 'inprog':
             q = 'inprog'
             query = (db.question.qtype == 'quest') & (db.question.status == 'In Progress')
+            #quests = db(query).select(db.question.id, db.question.questiontext, db.question.level, db.question.priority,
+            #                          orderby=[sortby], limitby=limitby)
             quests = db(query).select(db.question.id, db.question.questiontext, db.question.level, db.question.priority,
                                       orderby=[sortby], limitby=limitby, cache=(cache.ram, 1200), cacheable=True)
         elif request.vars.query == 'event':
@@ -101,7 +104,8 @@ def questload():
         query = (db.question.qtype == 'quest') & (db.question.status == 'Resolved')
         quests = db(query).select(db.question.id, db.question.questiontext, db.question.status, db.question.level,
                                   db.question.priority, db.question.correctanstext, db.question.numagree,
-                                  db.question.numdisagree, orderby=[sortby], limitby=limitby,cache=(cache.ram, 1200), cacheable=True)
+                                  db.question.numdisagree, orderby=[sortby], limitby=limitby,
+                                  cache=(cache.ram, 1200), cacheable=True)
 
     return dict(quests=quests, page=page, items_per_page=items_per_page, q=q)
 

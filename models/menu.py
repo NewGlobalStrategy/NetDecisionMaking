@@ -25,7 +25,8 @@ response.google_analytics_id = None
 
 response.menu = [
     ('Home', False, URL('default', 'index'),
-     [('Search', False, URL('search', 'newsearch'))]),
+     [('Search', False, URL('search', 'newsearch')),
+      ('GAE Simple Search', False, URL('search', 'gae_simple_search'))]),
     ('Create', False, URL('submit', 'new_question', args=['quest']),
      [('Create Question', False, URL('submit', 'new_question', args=['quest'])),
       ('Create Action', False, URL('submit', 'new_question', args=['action'])),
@@ -56,8 +57,8 @@ response.menu = [
         ('Downloads', False, URL('about', 'download'))])
 ]
 
-if auth.has_membership('manager'):
-    response.menu += [
+#if auth.has_membership('manager'): # removed as unnecessary query every time
+response.menu += [
         (T('Admin'), False, URL('admin', 'index'), [('Appadmin', False, URL('appadmin', 'manage', args=['auth']))])]
 
 

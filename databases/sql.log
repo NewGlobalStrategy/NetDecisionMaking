@@ -1,0 +1,355 @@
+timestamp: 2014-09-24T21:38:25.014000
+CREATE TABLE auth_user(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    first_name CHAR(128),
+    last_name CHAR(128),
+    email CHAR(512),
+    username CHAR(128),
+    password CHAR(512),
+    registration_key CHAR(512),
+    reset_password_key CHAR(512),
+    registration_id CHAR(512),
+    numquestions INTEGER,
+    score INTEGER,
+    rating INTEGER,
+    level INTEGER,
+    numcorrect INTEGER,
+    numwrong INTEGER,
+    numpassed INTEGER,
+    exclude_categories TEXT,
+    continent CHAR(512),
+    country CHAR(512),
+    subdivision CHAR(512),
+    privacypref CHAR(512),
+    avatar CHAR(512),
+    avatar_thumb CHAR(512),
+    show_hints CHAR(1)
+);
+success!
+timestamp: 2014-09-24T21:38:25.201000
+CREATE TABLE auth_group(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    role CHAR(512),
+    description TEXT
+);
+success!
+timestamp: 2014-09-24T21:38:25.295000
+CREATE TABLE auth_membership(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    group_id INTEGER REFERENCES auth_group (id) ON DELETE CASCADE
+);
+success!
+timestamp: 2014-09-24T21:38:25.471000
+CREATE TABLE auth_permission(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    group_id INTEGER REFERENCES auth_group (id) ON DELETE CASCADE,
+    name CHAR(512),
+    table_name CHAR(512),
+    record_id INTEGER
+);
+success!
+timestamp: 2014-09-24T21:38:25.580000
+CREATE TABLE auth_event(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    time_stamp TIMESTAMP,
+    client_ip CHAR(512),
+    user_id INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    origin CHAR(512),
+    description TEXT
+);
+success!
+timestamp: 2014-09-24T21:38:25.754000
+CREATE TABLE auth_cas(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    created_on TIMESTAMP,
+    service CHAR(512),
+    ticket CHAR(512),
+    renew CHAR(1)
+);
+success!
+timestamp: 2014-09-24T21:38:25.926000
+CREATE TABLE website_parameters(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    website_name_long CHAR(512),
+    website_name CHAR(512),
+    website_title CHAR(512),
+    website_subtitle CHAR(512),
+    website_url CHAR(512),
+    longdesc TEXT,
+    shortdesc CHAR(512),
+    level1desc CHAR(512),
+    level2desc CHAR(512),
+    level3desc CHAR(512),
+    force_language CHAR(512),
+    mailserver_url CHAR(512),
+    mailserver_port INTEGER,
+    mailserver_sender_mail CHAR(512),
+    mailserver_sender_login CHAR(512),
+    mailserver_sender_pass CHAR(512),
+    google_analytics_id CHAR(512),
+    seo_website_title CHAR(512),
+    seo_meta_author CHAR(512),
+    seo_meta_description CHAR(512),
+    seo_meta_keywords CHAR(512),
+    seo_meta_generator CHAR(512),
+    quests_per_page INTEGER,
+    comments_per_page INTEGER
+);
+success!
+timestamp: 2014-09-24T21:38:26.176000
+CREATE TABLE category(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cat_desc CHAR(512),
+    categorydesc TEXT
+);
+success!
+timestamp: 2014-09-24T21:38:26.348000
+CREATE TABLE continent(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    continent_name CHAR(512)
+);
+success!
+timestamp: 2014-09-24T21:38:26.535000
+CREATE TABLE country(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    country_name CHAR(512),
+    continent CHAR(512)
+);
+success!
+timestamp: 2014-09-24T21:38:26.692000
+CREATE TABLE subdivision(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    subdiv_name CHAR(512),
+    country CHAR(512)
+);
+success!
+timestamp: 2014-09-24T21:38:26.817000
+CREATE TABLE scope(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    description CHAR(512)
+);
+success!
+timestamp: 2014-09-24T21:38:27.004000
+CREATE TABLE download(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title CHAR(512) UNIQUE,
+    file CHAR(512),
+    description TEXT,
+    version CHAR(512)
+);
+success!
+timestamp: 2014-09-24T21:38:27.160000
+CREATE TABLE scoring(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    level INTEGER,
+    right INTEGER,
+    wrong INTEGER,
+    rightchallenge INTEGER,
+    wrongchallenge INTEGER,
+    rightaction INTEGER,
+    wrongaction INTEGER,
+    nextlevel INTEGER,
+    submitter INTEGER
+);
+success!
+timestamp: 2014-09-24T21:38:27.332000
+CREATE TABLE location(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    location_name CHAR(512),
+    address1 CHAR(512),
+    address2 CHAR(512),
+    address3 CHAR(512),
+    address4 CHAR(512),
+    addrcode CHAR(512),
+    addrurl CHAR(512),
+    continent CHAR(512),
+    country CHAR(512),
+    subdivision CHAR(512),
+    geox DOUBLE,
+    geoy DOUBLE,
+    description TEXT,
+    shared CHAR(1),
+    auth_userid INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    createdate TIMESTAMP
+);
+success!
+timestamp: 2014-09-24T21:38:27.629000
+CREATE TABLE event(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_name CHAR(512),
+    locationid INTEGER REFERENCES location (id) ON DELETE CASCADE,
+    eventurl CHAR(512),
+    startdatetime TIMESTAMP,
+    enddatetime TIMESTAMP,
+    description TEXT,
+    shared CHAR(1),
+    owner INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    createdate TIMESTAMP,
+    eventquestids TEXT,
+    eventquestposx TEXT,
+    eventquestposy TEXT
+);
+success!
+timestamp: 2014-09-24T21:38:27.926000
+CREATE TABLE question(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    qtype CHAR(512),
+    questiontext TEXT,
+    level INTEGER,
+    status CHAR(512),
+    auth_userid INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    category CHAR(512),
+    activescope CHAR(512),
+    continent CHAR(512),
+    country CHAR(512),
+    subdivision CHAR(512),
+    scopetext CHAR(512),
+    numanswers INTEGER,
+    answers TEXT,
+    answercounts TEXT,
+    totanswers INTEGER,
+    correctans INTEGER,
+    correctanstext CHAR(512),
+    urgency DOUBLE,
+    importance DOUBLE,
+    totratings INTEGER,
+    priority DOUBLE,
+    numchallenges INTEGER,
+    numchallenged INTEGER,
+    currentrouting CHAR(512),
+    unpanswers INTEGER,
+    createdate TIMESTAMP,
+    resolvedate TIMESTAMP,
+    answerreasons TEXT,
+    answerreason2 TEXT,
+    answerreason3 TEXT,
+    numagree INTEGER,
+    numdisagree INTEGER,
+    responsible CHAR(512),
+    respemail CHAR(512),
+    respurl CHAR(512),
+    contactmethod CHAR(512),
+    duedate TIMESTAMP,
+    achieved INTEGER,
+    eventid INTEGER REFERENCES event (id) ON DELETE CASCADE,
+    challenge CHAR(1),
+    numcomments INTEGER
+);
+success!
+timestamp: 2014-09-24T21:38:28.117000
+CREATE TABLE userquestion(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    questionid INTEGER REFERENCES question (id) ON DELETE CASCADE,
+    auth_userid INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    status CHAR(512),
+    level INTEGER,
+    answer INTEGER,
+    reject CHAR(1),
+    urgency INTEGER,
+    importance INTEGER,
+    score INTEGER,
+    answerreason TEXT,
+    ansdate TIMESTAMP,
+    category CHAR(512),
+    activescope CHAR(512),
+    continent CHAR(512),
+    country CHAR(512),
+    subdivision CHAR(512),
+    changecat CHAR(1),
+    changescope CHAR(1),
+    resolvedate TIMESTAMP
+);
+success!
+timestamp: 2014-09-24T21:38:28.305000
+CREATE TABLE questchallenge(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    questionid INTEGER REFERENCES question (id) ON DELETE CASCADE,
+    auth_userid INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    status CHAR(512),
+    challengereason TEXT,
+    challengedate TIMESTAMP
+);
+success!
+timestamp: 2014-09-24T21:38:28.464000
+CREATE TABLE questagreement(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    questionid INTEGER REFERENCES question (id) ON DELETE CASCADE,
+    auth_userid INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    agree INTEGER,
+    agreedate TIMESTAMP,
+    urgency INTEGER,
+    importance INTEGER,
+    level INTEGER
+);
+success!
+timestamp: 2014-09-24T21:38:28.605000
+CREATE TABLE questurgency(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    questionid INTEGER REFERENCES question (id) ON DELETE CASCADE,
+    auth_userid INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    urgency INTEGER,
+    importance INTEGER,
+    level INTEGER
+);
+success!
+timestamp: 2014-09-24T21:38:28.839000
+CREATE TABLE questlink(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sourceid INTEGER REFERENCES question (id) ON DELETE CASCADE,
+    targetid INTEGER REFERENCES question (id) ON DELETE CASCADE,
+    createdby INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    createcount INTEGER,
+    deletecount INTEGER,
+    status CHAR(512),
+    lastdeleter INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    lastaction CHAR(512),
+    createdate TIMESTAMP
+);
+success!
+timestamp: 2014-09-24T21:38:28.980000
+CREATE TABLE questcomment(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    questionid INTEGER REFERENCES question (id) ON DELETE CASCADE,
+    auth_userid INTEGER REFERENCES auth_user (id) ON DELETE CASCADE,
+    comment TEXT,
+    status CHAR(512),
+    numreject INTEGER,
+    usersreject TEXT,
+    commentdate TIMESTAMP
+);
+success!
+timestamp: 2014-09-24T21:38:29.122000
+CREATE TABLE viewscope(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sortorder CHAR(512),
+    qsortorder CHAR(512),
+    asortorder CHAR(512),
+    showscope CHAR(1),
+    scope CHAR(512),
+    continent CHAR(512),
+    country CHAR(512),
+    subdivision CHAR(512),
+    showcat CHAR(1),
+    category CHAR(512),
+    searchstring CHAR(512)
+);
+success!
+timestamp: 2014-09-24T21:38:29.263000
+CREATE TABLE message(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    msgtype CHAR(512),
+    description TEXT,
+    message_text TEXT
+);
+success!
+timestamp: 2014-09-24T21:38:29.404000
+CREATE TABLE eventmap(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    eventid INTEGER REFERENCES event (id) ON DELETE CASCADE,
+    questid INTEGER REFERENCES question (id) ON DELETE CASCADE,
+    xpos DOUBLE,
+    ypos DOUBLE
+);
+success!

@@ -2,7 +2,7 @@
 #
 # Networked Decision Making
 # Development Sites (source code): 
-#   http://code.google.com/p/global-decision-making-system/
+# http://code.google.com/p/global-decision-making-system/
 #   http://github.com/NewGlobalStrategy/NetDecisionMaking
 #
 # Demo Sites (Google App Engine)
@@ -232,8 +232,8 @@ def get_question():
         for row in ansquests:
             session.answered.append(row.questionid)
 
-    if session.exclude_cats is None:
-        session.exclude_cats = auth.user.exclude_categories
+    #if session.exclude_cats is None:
+    session.exclude_cats = auth.user.exclude_categories
 
     if session.continent == 'Unspecified':  # ie no geographic restriction
         for i in xrange(0, 4):
@@ -251,6 +251,7 @@ def get_question():
                 orderstr = db.question.level | ~db.question.priority
             elif i == 3:
                 query = (db.question.status == 'In Progress')
+                orderstr = ~db.question.priority
 
             if questtype != 'all':
                 query &= db.question.qtype == questtype
@@ -267,11 +268,11 @@ def get_question():
             #an outer join so it can work on google app engine
             #then filter for unanswered and categories users dont want questions on    
             alreadyans = quests.exclude(lambda row: row.id in session.answered)
-            alreadyans = quests.exclude(lambda row: row.category in session.exclude_cats)
+            if session.exclude_cats:
+                alreadyans = quests.exclude(lambda row: row.category in session.exclude_cats)
             questrow = quests.first()
             if questrow is not None:
                 break
-
     else:
         #This is separate logic which applies when user has specified a continent - the general
         #thinking is that users cannot opt out of global questions but they may specify a continent
@@ -338,7 +339,6 @@ def get_question():
         #No questions because all questions in progress are answered
         redirect(URL('all_questions'))
 
-
     #put quests into a list of id's to only run this when
     #we run out of questions for this user ie make a queue or change selection 
     #type for the list we want to answer
@@ -380,6 +380,7 @@ def answer_question():
                                                   'reject': 'Select if invalid or off subject '},
                     hidden=dict(level='level'), formstyle='table3cols')
 
+    #bootstrap3_inline
     quest = db(db.question.id == questid).select(db.question.id, db.question.questiontext,
                                                  db.question.category, db.question.activescope, db.question.scopetext,
                                                  db.question.qtype, db.question.numanswers, db.question.answers,
@@ -677,7 +678,7 @@ def score_question():
 
             if auth.user.id == row.auth_userid:  # update auth values
                 auth.user.update(score=updscore, level=userlevel, rating=userlevel, numcorrect=
-                auth.user.numcorrect + numcorrect, numwrong=auth.user.numwrong + numwrong,
+                                 auth.user.numcorrect + numcorrect, numwrong=auth.user.numwrong + numwrong,
                                  numpassed=auth.user.numpassed + numpassed)
 
             if changecat is True:
@@ -798,7 +799,7 @@ def score_question():
                     successful = False
                 else:
                     successful = True
-                #score_challenge(quest.id, successful, level)
+                    #score_challenge(quest.id, successful, level)
     else:  # intunpanswers < stdrouting
         #the general requirement here is to do nothing - however because the
         #solution focuses on solving the highest priority question at all times

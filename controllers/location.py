@@ -106,6 +106,7 @@ def locationqry():
 
     return dict(locations=locations, page=page, items_per_page=items_per_page)
 
+
 def index():
     #are using this for locations
     if len(request.args):
@@ -115,9 +116,10 @@ def index():
     items_per_page = 20
     limitby = (page * items_per_page, (page + 1) * items_per_page + 1)
 
-    locations = db(db.location.id>0).select(orderby=[~db.location.createdate], limitby=limitby)
+    locations = db(db.location.id > 0).select(orderby=[~db.location.createdate], limitby=limitby)
 
     return dict(locations=locations, page=page, items_per_page=items_per_page)
+
 
 def viewlocation():
     #This should list location details with an event load for upcoming and future events at this location

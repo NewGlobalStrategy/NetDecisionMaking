@@ -1,7 +1,7 @@
 {{from ndsfunctions import truncquest}}
 {{if actions:}}
 {{if q=='std':}}
-<table id='TabAnswers' class='issuetable'>
+<table id='TabAnswers' class='table issuetable2 table-bordered table-condensed'>
 				<thead>
 					<tr>
 						<th width="5%">Status</th>
@@ -15,7 +15,7 @@
                     <tbody>
 {{for i,row in enumerate(actions):}}
 {{if i==items_per_page: break}}
-<tr class={{if row.status == 'In Progress':}}"inprogress"{{else:}}"resolved"{{pass}}>
+<tr class={{if row.status == 'In Progress':}}"actinprog"{{else:}}"actresolved"{{pass}}>
 <th>{{=A(row.status[0],_href=URL('viewquest','index',args=[row.id],extension='html'),_title=row.status)}}</th>
 <td>{{=truncquest(row.questiontext)}}</td>
 <td>{{=row.responsible}}</td>

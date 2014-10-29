@@ -259,16 +259,35 @@ class GAEBackend(SimpleBackend):
         self.fieldnames = fieldnames
         self.index = search.Index(name=self.table._tablename)
 
+
+    #
+    #except search.Error: to be added in
+
     def after_insert(self, fields, id):
         if DEBUG:
             print 'after insert', fields, id
         fieldlist=[]
-        for fieldname in self.fieldnames:
+        for f in self.fieldnames:
             #fieldlist.append(name=fieldname, fields[fieldname]),
-            #this is a bit crude - setting everything as htmal field regardless of type
-            #may need some sort of extra field value on table to set the types you want to do this properly
-            fieldvalue = search.HtmlField(name=fieldname, value=fields[fieldname])
-            fieldlist.append(fieldvalue)
+            #Proposed mapping of fieldtypes to search types is as follows:
+            #string - textfield
+            #test - html field
+            #datetime & datetime to date fields
+            #list:string woudl be added later and would need to iterate through           
+            if self.table[f].type == 'string':
+                fieldvalue = search.TextField(name=f, value=fields[f])
+                fieldlist.append(fieldvalue)
+            elif self.table[f].type == 'list:string':
+                for listvalue in fields[f]:
+                    if listvalue:
+                        fieldvalue = search.TextField(name=f, value=listvalue)
+                        fieldlist.append(fieldvalue)
+            elif self.table[f].type == 'date' or self.table[f].type == 'datetime':
+                fieldvalue = search.DateField(name=f, value=fields[f])
+                fieldlist.append(fieldvalue)
+            else: #should be text
+                fieldvalue = search.HtmlField(name=f, value=fields[f])
+                fieldlist.append(fieldvalue)
         strid = self.table._tablename + '.' + str(id)
         my_document = search.Document(doc_id = strid, fields = fieldlist)
         add_result = self.index.put(my_document)
@@ -277,7 +296,38 @@ class GAEBackend(SimpleBackend):
         return True
 
     def after_update(self, queryset, fields):
-        pass
+        return True # not using this for current app as causes more harm than good
+        if DEBUG:
+            print 'after update', queryset, fields
+        for id in self.get_ids(queryset):
+            fieldlist=[]
+            for f in self.fieldnames:
+                update = False
+                if f in fields and fields[f]:
+                    #fieldlist.append(name=fieldname, fields[fieldname]),
+                    #this is a bit crude - setting everything as htmal field regardless of type
+                    #may need some sort of extra field value on table to set the types you want to do this properly
+                    if self.table[f].type == 'string':
+                        fieldvalue = search.TextField(name=f, value=fields[f])
+                        fieldlist.append(fieldvalue)
+                    elif self.table[f].type == 'list:string':
+                        for listvalue in fields[f]:
+                            if listvalue:
+                                fieldvalue = search.TextField(name=f, value=listvalue)
+                                fieldlist.append(fieldvalue)
+                    elif (self.table[f].type == 'date' or self.table[f].type == 'datetime'):
+                        fieldvalue = search.DateField(name=f, value=fields[f])
+                        fieldlist.append(fieldvalue)
+                    else: #should be text
+                        fieldvalue = search.HtmlField(name=f, value=fields[f])
+                        fieldlist.append(fieldvalue)
+                    update = True
+            if update:
+                strid = self.table._tablename + '.' + str(id)
+                my_document = search.Document(doc_id = strid, fields = fieldlist)
+                add_result = self.index.put(my_document)
+        if DEBUG:
+            pass
         return True
 
     def after_delete(self, queryset):
@@ -311,17 +361,38 @@ class GAEBackend(SimpleBackend):
 
         return ids
 
+    def doc_search(self, limit, mode, **fieldkeys):
+        query = ''
+        for fieldname in fieldkeys:
+            if fieldname:
+                query += ' ' + fieldkeys[fieldname]
+        ids=[]
+        try:
+            #search_results = self.index.search(query) # format for query string
+            search_query = search.Query(query_string=query, options=search.QueryOptions(
+            limit=limit))
+            search_results = self.index.search(search_query) #format with query object
+            #returned_count = len(search_results.results)
+            #number_found = search_results.number_found
+            #fullids = [str(doc.doc_id) for doc in search_results]
+            #ids = [docid[docid.index('.')+1:] for docid in fullids if docid.index('.') > 0]
+        except:
+            pass
+
+        return search_results
+
 class Haystack(object):
-    def __init__(self, table, backend=SimpleBackend, **attr):
+    def __init__(self, table, backend=SimpleBackend, fieldtypes=('string','text','datetime','date'), **attr):
         self.table = table
         self.backend = backend(table, **attr)
+        self.fieldtypes = fieldtypes
 
 
     def indexes(self, *fieldnames):
         invalid = [f for f in fieldnames if not f in self.table.fields() or
-                   not self.table[f].type in ('string', 'text')]
+                   not self.table[f].type in self.fieldtypes]
         if invalid:
-            raise RuntimeError("Unable to index fields: %s" % ', '.join(invalid))
+            raise RuntimeError("Unable to index fields: %s" %', '.join(invalid))
         self.backend.indexes(*fieldnames)
         self.table._after_insert.append(
             lambda fields, id: self.backend.after_insert(fields, id))
@@ -333,6 +404,10 @@ class Haystack(object):
     def search(self, limit=20, mode='and', **fieldkeys):
         ids = self.backend.meta_search(limit, mode, **fieldkeys)
         return self.table._id.belongs(ids)
+
+    def searchdocs(self, limit=20, mode='and', **fieldkeys):
+        search_results = self.backend.doc_search(limit, mode, **fieldkeys)
+        return search_results
 
 def test(mode='simple'):
     db = DAL()

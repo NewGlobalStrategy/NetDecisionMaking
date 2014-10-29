@@ -66,6 +66,7 @@ def new_event():
               'description', 'shared']
     form = SQLFORM(db.event, fields=fields, formstyle='table3cols')
 
+    form.vars.locationid = db(db.location.location_name =='Unspecified').select(db.location.id, cache=(cache.ram,3600), cacheable=True).first().id
     if form.validate():
         form.vars.id = db.event.insert(**dict(form.vars))
         #response.flash = 'form accepted'
@@ -108,7 +109,7 @@ def index():
     #if scope == 'My':
     #    query = (db.event.auth_userid == auth.user.id)
     #else:
-    #    query = (db.event.id > 0)
+    query = (db.event.id > 0)
 
     datenow = datetime.datetime.utcnow()
     #start_date = end_date - datetime.timedelta(days=8)
@@ -271,7 +272,6 @@ def vieweventmap():
     #as then loads with another layout html and thing fails badly possibly better to change to just return message if
     #no selection for now
 
-    eventid = 0
     grwidth = 800
     grheight = 600
     FIXWIDTH = 800
@@ -307,7 +307,8 @@ def vieweventmap():
     # quests=db(db.question.id.belongs([4,8,10])).select(db.question.id, db.question.questiontext,
     # db.question.correctanstext, db.question.status, db.question.level)
     quests = db(query).select(db.question.id, db.question.questiontext, db.question.correctanstext, db.question.status,
-                              db.question.level, db.question.qtype, db.question.category, db.question.priority)
+                              db.question.level, db.question.qtype, db.question.category, db.question.priority,
+                              cache=(cache.ram, 120), cacheable=True)
 
     questlist = [x.id for x in quests]
     if not questlist:
@@ -327,7 +328,7 @@ def vieweventmap():
     intquery = (db.questlink.status == 'Active') & (db.questlink.sourceid.belongs(questlist))
 
     intlinks = db(intquery).select(db.questlink.id, db.questlink.sourceid, db.questlink.targetid,
-                                   db.questlink.createcount, db.questlink.deletecount)
+                                   db.questlink.createcount, db.questlink.deletecount,cache=(cache.ram, 120), cacheable=True)
 
     links = [x.sourceid for x in intlinks]
 

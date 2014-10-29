@@ -1,9 +1,6 @@
 {{extend 'layout.html'}}
-<p>Hint: Locations are used to group events and they can be physical or virtual.
- All events must have a location and as a creator of a location you can choose if it is shared with other users
-so they can add events or if only you as the owner of the event can do this.</p>
 
-<h1>Create Location</h1>
+<h1 data-toggle =" popover" title ="Locations are used to group events and they can be physical or virtual.  All events must have a location and as a creator of a location you can choose if it is shared with other users so they can add events or if only you as the owner of the event can do this." data-content="">Create Location</h1>
 
 {{=form}}
 
@@ -31,21 +28,25 @@ function showsubdivValue(newValue)
 
 jQuery(document).ready(function(){
 
-   jQuery('#location_country__row .w2p_fc').html('<select id="countryopt" name="countryopt" onchange="showcountryValue(this.value)"> <option value="Unspecified">Unspecified</option>   </select>');
-   jQuery('#location_subdivision__row .w2p_fc').html('<select id="subdivopt" name="subdivopt" onchange="showsubdivValue(this.value)"> <option value="Unspecified">Unspecified</option> </select>');
+   $(" body").tooltip({selector: '[data-toggle = popover]'}); 
+   $('#location_country__row .w2p_fc').html('<select id="countryopt" name="countryopt" onchange="showcountryValue(this.value)"> <option value="Unspecified">Unspecified</option>   </select>');
+   $('#location_subdivision__row .w2p_fc').html('<select id="subdivopt" name="subdivopt" onchange="showsubdivValue(this.value)"> <option value="Unspecified">Unspecified</option> </select>');
 
-            jQuery('#location_country__row .w2p_fw').hide();
-            jQuery('#location_subdivision__row .w2p_fw').hide();
+            $('#location_country__row .w2p_fw').hide();
+            $('#location_subdivision__row .w2p_fw').hide();
 
-            jQuery('#location_continent').change(function(){
-            jQuery('#countryopt').empty();
+            $('#location_continent').change(function(){
+            $('#countryopt').empty();
             ajax('{{=URL('submit','country')}}', ['continent'], 'countryopt');});
 
-            jQuery('#location_country').change(function(){
-            jQuery('#subdivopt').empty();
+            $('#location_country').change(function(){
+            $('#subdivopt').empty();
             ajax('{{=URL('submit','subdivn')}}', ['country'], 'subdivopt');});
 
 
 });
 
 </script>
+
+
+

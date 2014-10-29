@@ -26,7 +26,7 @@ class AnswerQuestion (FunctionalTest):
 	time.sleep(1)
 
     def test_answer(self):
-        for x in range(0,10):
+        for x in range(0,5):
             #self.browser.find_element_by_xpath("(//input[@name='ans'])[2]").click()
             toclick = WebDriverWait(self, 10).until(lambda self : self.browser.find_element_by_xpath("(//input[@name='ans'])[2]"))	
             toclick.click()

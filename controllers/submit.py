@@ -81,9 +81,10 @@ def new_question():
 
         form = SQLFORM(db.question, fields=fields, labels=labels, formstyle='table3cols')
 
-    if session.event_name:
+    if session.eventid:
         form.vars.eventid = session.eventid
-
+    else:
+        form.vars.eventid = db(db.event.event_name =='Unspecified').select(db.event.id).first().id
 
     #this can be the same for both questions and actions
     if form.validate():
@@ -108,6 +109,7 @@ def new_question():
         #    activetext = form.vars.subdivision
 
         #form.vars.scopetext = activetext
+        form.vars.correctanstext = ''
         form.vars.createdate = request.utcnow
 
         #form.vars.priorquests = priorquest - now need to process separately

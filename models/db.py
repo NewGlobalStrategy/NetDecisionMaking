@@ -36,7 +36,8 @@ if not request.env.web2py_runtime_gae:
     # db = DAL('sqlite://storage.sqlite',lazy_tables=True) to be tested
 else:
     ## connect to Google BigTable (optional 'google:datastore://namespace')
-    db = DAL('google:datastore') # lets try new one below
+    db = DAL('google:datastore+ndb', lazy_tables=True) # lets try new one below
+    #db = DAL('google:datastore', lazy_tables=True) # lets try new one below
     #db = DAL('google:datastore+ndb')
     ## store sessions and tickets there
     #session.connect(request, response, db=db)
@@ -45,7 +46,6 @@ else:
     from gluon.contrib.memdb import MEMDB
     from google.appengine.api.memcache import Client
     session.connect(request, response, db = MEMDB(Client()))
-    #session.connect(request, response, db = db)
 
 ## by default give a view/generic.extension to all actions from localhost
 ## none otherwise. a pattern can be 'controller/function.extension'
@@ -81,8 +81,8 @@ auth.settings.extra_fields['auth_user'] = [
     Field('numcorrect', 'integer', default=0, readable=False, writable=False, label='Correct'),
     Field('numwrong', 'integer', default=0, readable=False, writable=False, label='Wrong'),
     Field('numpassed', 'integer', default=0, readable=False, writable=False, label='Passed'),
-    Field('exclude_categories', 'list:string', default='None', label='Excluded Categories',
-          comment="Select subjects you DON'T want questions on (use ctl key to select multiple items)"),
+    Field('exclude_categories', 'list:string', label='Excluded Categories',
+          comment="Select subjects you DON'T want questions on"),
     Field('continent', 'string', default='Unspecified', label='Continent'),
     Field('country', 'string', default='Unspecified', label='Country'),
     Field('subdivision', 'string', default='Unspecified', label='Sub-division'),

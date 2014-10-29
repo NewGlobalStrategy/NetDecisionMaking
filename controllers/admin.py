@@ -2,7 +2,7 @@
 #
 # Networked Decision Making
 # Development Sites (source code): 
-#   http://code.google.com/p/global-decision-making-system/
+# http://code.google.com/p/global-decision-making-system/
 #   http://github.com/NewGlobalStrategy/NetDecisionMaking
 #
 # Demo Sites (Google App Engine)
@@ -208,6 +208,7 @@ def clearall():
     db.continent.truncate()
     db.scoring.truncate()
     #db.download.truncate()
+    db.init.truncate()
     db.category.truncate()
     db.eventmap.truncate()
     db.website_parameters.truncate()
@@ -226,6 +227,14 @@ def datasetup():
                            categorydesc="Set to select all questions")
         db.category.insert(cat_desc="Unspecified",
                            categorydesc="Catchall category")
+
+    if db(db.init.id > 0).isempty():
+        db.init.insert(website_init = True)
+        global INIT
+        INIT = db(db.init).select().first()
+
+    if db(db.website_parameters.id > 0).isempty():
+        db.website_parameters.insert()
 
     #setup the basic scopes that are to be in use and populate some default
     #continents, countrys and regions
@@ -296,7 +305,7 @@ def init():
 
 @auth.requires_membership('manager')
 def addstdcategories():
-    categories = [["None", "Set to select all questions"], ["Unspecified", "Catchall category"], ["Water", "Water"],
+    categories = [["Unspecified", "Catchall category"], ["Water", "Water"],
                   ["Food", "Food"], ["Shelter", "Shelter"],
                   ["Healthcare", "Healthcare"], ["Freedom", "Freedom"], ["Fairness", "Fairness"], ["Fun", "Fun"],
                   ["Net Decision Making", "Net Decision Making"], ["Strategy", "Strategy"],

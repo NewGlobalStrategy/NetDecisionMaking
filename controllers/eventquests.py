@@ -31,7 +31,6 @@
 #but probably can create a new list as we go of the questids inserted and then create the questlink table from that somehow
 #need the list of links in a table and just map to the questids actually generated
 
-import time
 
 @auth.requires_membership('manager')
 def addndsquests():
@@ -41,7 +40,6 @@ def addndsquests():
 
     if db(db.event.event_name == "Net Decision Making Evolution").isempty():
         nds_id = db.event.insert(event_name="Net Decision Making Evolution", shared=False)
-        nds_event = 'Net Decision Making Evolution'
     else:
         messagetext = 'Event already setup no questions added'
         return dict(messagetext=messagetext)
@@ -74,11 +72,10 @@ def addndsquests():
                   'numanswers': 2, 'answers': ['Approve', 'Disapprove', 'OK'], 'urgency': 7, 'importance': 7,
                   'category': 'Net Decision Making', 'responsible': 'Eric Schmidt', 'eventid': nds_id}]
 
-
-    #Best way to publicise nds
     insertlist = []
     for x in ndsquests:
         qtext = x['questiontext']
+        x['correctanstext'] = ''
         q = 0
         if not request.env.web2py_runtime_gae:
             if db(db.question.questiontext == qtext).isempty():
@@ -87,7 +84,7 @@ def addndsquests():
             q = db.question.insert(**x)
         insertlist.append(q)
     #have assumed id of first action is 28 - this needs checked
-    stdlinks = [[0,1],[1,2],[2,3],[2,4],[4,5],[2,6],[1,7]]
+    stdlinks = [[0, 1], [1, 2], [2, 3], [2, 4], [4, 5], [2, 6], [1, 7]]
 
     #then if we have inserted those questions we would create related link
 
@@ -96,12 +93,11 @@ def addndsquests():
         target_id = insertlist[x[1]]
         if source_id > 0 and target_id > 0:
             if db(db.questlink.sourceid == source_id and db.questlink.targetid == target_id).isempty():
-                db.questlink.insert(sourceid=source_id,targetid=target_id, createcount=1, deletecount=0)
+                db.questlink.insert(sourceid=source_id, targetid=target_id, createcount=1, deletecount=0)
 
-    eventmap = [[50,50], [450,100], [450,350], [750,600], [500,600], [450,900], [200,650], [150,350]]
+    eventmap = [[50, 50], [450, 100], [450, 350], [750, 600], [500, 600], [450, 900], [200, 650], [150, 350]]
     for i, x in enumerate(eventmap):
-        db.eventmap.insert(eventid = nds_id, questid = insertlist[i],xpos = eventmap[i][0], ypos = eventmap[i][1])
-
+        db.eventmap.insert(eventid=nds_id, questid=insertlist[i], xpos=eventmap[i][0], ypos=eventmap[i][1])
 
     return dict(messagetext=messagetext)
 
@@ -114,7 +110,6 @@ def addevtquests():
     messagetext = 'Strategy Event Quests Added'
     if db(db.event.event_name == "Global Strategy Review").isempty():
         gs_id = db.event.insert(event_name="Global Strategy Review", shared=True)
-        gs_event = 'Global Strategy Review'
     else:
         messagetext = 'Event already setup no questions added'
         return dict(messagetext=messagetext)
@@ -125,7 +120,7 @@ def addevtquests():
     #if db(db.event.event_name == "Global Healthcare Meeting").isempty():
     #   nds_event = db.event.insert(event_name="Global Healthcare Meeting", shared=True)
 
-    gsquests = [ {'questiontext': r'Is the world under-achieving?', 'answers': ["Yes", "No"], 'urgency': 7,
+    gsquests = [{'questiontext': r'Is the world under-achieving?', 'answers': ["Yes", "No"], 'urgency': 7,
                  'importance': 7, 'category': 'Organisation', 'eventid': gs_id},
                    {'questiontext': r'Should we develop a global strategy as outlined at: http://www.ted.com/talks/jamie_drummond_how_to_set_goals_for_the_world.html ?',
                     'answers': ["Yes", "No"], 'urgency': 6, 'importance': 8, 'category': 'Strategy',
@@ -168,6 +163,7 @@ def addevtquests():
 
     insertlist = []
     for x in gsquests:
+        x['correctanstext'] = ''
         qtext = x['questiontext']
         q = 0
         if not request.env.web2py_runtime_gae:
@@ -177,20 +173,10 @@ def addevtquests():
             q = db.question.insert(**x)
         insertlist.append(q)
 
-    stdlinks = [[4,6],[4,7],[5,4]]
-
-    #then if we have inserted those questions we would create related link
-    #
-    #for x in stdlinks:
-    #    source_id = insertlist[x[0]]
-    #    target_id = insertlist[x[1]]
-    #    if source_id > 0 and target_id > 0:
-    #        if db(db.questlink.sourceid == source_id and db.questlink.targetid == target_id).isempty():
-    #            db.questlink.insert(sourceid=source_id,targetid=target_id, createcount=1, deletecount=0)
-
-    eventmap = [[400,0],[200,450],[200,200],[150,750],[350,750],[850,550],[850,300],[850,0],[600,700],[500,300]]
+    eventmap = [[400, 0], [200, 450], [200, 200], [150, 750], [350, 750], [850, 550], [850, 300], [850, 0], [600, 700],
+                [500, 300]]
     for i, x in enumerate(eventmap):
-        db.eventmap.insert(eventid = gs_id, questid = insertlist[i],xpos = eventmap[i][0], ypos = eventmap[i][1])
+        db.eventmap.insert(eventid=gs_id, questid=insertlist[i], xpos=eventmap[i][0], ypos=eventmap[i][1])
 
     return dict(messagetext=messagetext)
 
@@ -203,16 +189,9 @@ def addhealthquests():
 
     if db(db.event.event_name == "Healthcare Review").isempty():
         gs_id = db.event.insert(event_name="Healthcare Review", shared=True)
-        gs_event = 'Healthcare Review'
     else:
         messagetext = 'Event already setup no questions added'
         return dict(messagetext=messagetext)
-
-    #if db(db.event.event_name == "Net Decision Making Evolution").isempty():
-    #    nds_event = db.event.insert(event_name="Net Decision Making Evolution", shared=False)
-
-    #if db(db.event.event_name == "Global Healthcare Meeting").isempty():
-    #   nds_event = db.event.insert(event_name="Global Healthcare Meeting", shared=True)
 
     stdquests = [       
         {'questiontext': r'Is aging a disease or is it just inevitable and we should accept it?',
@@ -245,6 +224,7 @@ def addhealthquests():
 
     insertlist = []
     for x in stdquests:
+        x['correctanstext'] = ''
         qtext = x['questiontext']
         q = 0
         if not request.env.web2py_runtime_gae:
@@ -254,7 +234,7 @@ def addhealthquests():
             q = db.question.insert(**x)
         insertlist.append(q)
     #have assumed id of first action is 28 - this needs checked
-    stdlinks = [[0,1],[0,2],[1,3],[3,4]]
+    stdlinks = [[0, 1], [0, 2], [1, 3], [3, 4]]
 
     #then if we have inserted those questions we would create related link
     #
@@ -263,12 +243,12 @@ def addhealthquests():
         target_id = insertlist[x[1]]
         if source_id > 0 and target_id > 0:
             if db(db.questlink.sourceid == source_id and db.questlink.targetid == target_id).isempty():
-                db.questlink.insert(sourceid=source_id,targetid=target_id, createcount=1, deletecount=0)
+                db.questlink.insert(sourceid=source_id, targetid=target_id, createcount=1, deletecount=0)
 
-    eventmap = [[300,50],[300,350],[50,500],[300,600],[300,850],[700,450],[800,750],[550,750],[650,200]]
+    eventmap = [[300, 50], [300, 350], [50, 500], [300, 600], [300, 850], [700, 450], [800, 750], [550, 750],
+                [650, 200]]
     for i, x in enumerate(eventmap):
-        db.eventmap.insert(eventid = gs_id, questid = insertlist[i],xpos = eventmap[i][0], ypos = eventmap[i][1])
-
+        db.eventmap.insert(eventid=gs_id, questid=insertlist[i], xpos=eventmap[i][0], ypos=eventmap[i][1])
 
     return dict(messagetext=messagetext)
 
@@ -279,24 +259,27 @@ def addothquests():
     #to need split up to process on gae without timeout or whatever issues so setting up 4 programs seems ok for now
     #this replaces std quests for other things we have eg philosophy etc no event on these and just paste from stdquests
 
+    evid = db(db.event.event_name =='Unspecified').select(db.event.id).first().id
+    #'eventid': evid
+
     messagetext = 'Other questions have been added'
 
     stdquests = [{'questiontext': r'Do we know if nothing is a stable state?', 'numanswers': 3,
                   'answers': ["Yes", "No", "We don't know we just assume it is"], 'urgency': 3, 'importance': 6,
-                  'category': 'Philosophy'},
+                  'category': 'Philosophy','eventid': evid},
                  {'questiontext': r'Is there sufficient education on when to compete and when to co-operate?',
                   'answers': ["Yes", "No"],
-                  'urgency': 4, 'importance': 8, 'category': 'Strategy'},
+                  'urgency': 4, 'importance': 8, 'category': 'Strategy','eventid': evid},
                  {'questiontext': r'Did you choose where you were born?', 'answers': ["Yes", "No"], 'urgency': 4,
-                  'importance': 4, 'category': 'Philosophy'},
+                  'importance': 4, 'category': 'Philosophy','eventid': evid},
                  {
                      'questiontext': r'Is it right that place of birth determines so much of your life and restricts so many people?',
-                     'answers': ["Yes", "No"], 'urgency': 4, 'importance': 7, 'category': 'Philosophy'},
+                     'answers': ["Yes", "No"], 'urgency': 4, 'importance': 7, 'category': 'Philosophy','eventid': evid},
                  {'questiontext': r'Could we unite theists and atheists on a project to create heaven on earth?',
-                  'answers': ["Yes", "No"], 'urgency': 7, 'importance': 7, 'category': 'Philosophy'},
+                  'answers': ["Yes", "No"], 'urgency': 7, 'importance': 7, 'category': 'Philosophy','eventid': evid},
                  {'questiontext': r'What is the optimum number of countries in the world?',
                   'answers': ["Just right", "Too many", "Too few", "One"], 'urgency': 5, 'importance': 8,
-                  'category': 'Organisation'},
+                  'category': 'Organisation','eventid': evid},
                  {'questiontext': r'What is the main problem with the world right now?', 'numanswers': 6,
                   'answers': ["There is no problem - everything is perfect",
                               "There simply isn't enough food in the world so some people have to starve",
@@ -304,60 +287,60 @@ def addothquests():
                               "Humans lack the skills to organise the planet",
                               "Humans derive pleasure from having more than other people",
                               "Lack of vision to see that creating alignment on objectives will get us all much better futures and longer and happier lives"],
-                  'urgency': 7, 'importance': 8, 'category': 'Strategy'},
+                  'urgency': 7, 'importance': 8, 'category': 'Strategy','eventid': evid},
                  {'questiontext': r'Does God Exist?', 'answers': ["Yes", "No"], 'urgency': 3, 'importance': 7,
-                  'category': 'Philosophy'},
+                  'category': 'Philosophy','eventid': evid},
                  {'questiontext': r'Is God rational?', 'answers': ["Yes", "No"], 'urgency': 5, 'importance': 7,
-                  'category': 'Philosophy'},
+                  'category': 'Philosophy','eventid': evid},
                  {'questiontext': r'Is it rational to believe in an irrational God?', 'answers': ["Yes", "No"],
-                  'urgency': 6, 'importance': 7, 'category': 'Philosophy'},
+                  'urgency': 6, 'importance': 7, 'category': 'Philosophy','eventid': evid},
                  {'questiontext': r'Do countries assist or hinder the operation of the world?',
-                  'answers': ["Assist", "Hinder"], 'urgency': 6, 'importance': 7, 'category': 'Organisation'},
+                  'answers': ["Assist", "Hinder"], 'urgency': 6, 'importance': 7, 'category': 'Organisation','eventid': evid},
                  {'questiontext': r'Why are so many people unemployed?', 'numanswers': 5,
                   'answers': ["The unemployed are all useless",
                               "Just a cost of human progress that many are left with lots of leisure but little income",
                               "Inability to co-operate, share and work together", "Many people are just lazy",
-                              "Something else"], 'urgency': 8, 'importance': 7, 'category': 'Organisation'},
+                              "Something else"], 'urgency': 8, 'importance': 7, 'category': 'Organisation','eventid': evid},
                  {
                      'questiontext': r'Did JFK speed-up or slow down progress in getting to the moon by explaining that was the intention in 1962  http://www.astrosociology.com/Library/PDF/JFK%201962%20Rice%20University%20Speech%20Transcript.pdf ?',
-                     'answers': ["Speed Up", "Slow Down"], 'urgency': 7, 'importance': 7, 'category': 'Organisation'},
+                     'answers': ["Speed Up", "Slow Down"], 'urgency': 7, 'importance': 7, 'category': 'Organisation','eventid': evid},
                  {
                      'questiontext': r"If stating we were going to the moon was important to getting there is there not a similarly strong case for saying we are going to extend human lifespans?",
-                     'answers': ["Yes", "No"], 'urgency': 7, 'importance': 7, 'category': 'Organisation'},
+                     'answers': ["Yes", "No"], 'urgency': 7, 'importance': 7, 'category': 'Organisation','eventid': evid},
                  {'questiontext': r'Should Scotland become an independent country?', 'answers': ["Yes", "No"],
                   'urgency': 4, 'importance': 7, 'category': 'Organisation', 'continent': 'Europe (EU)',
-                  'country': 'United Kingdom (EU)', 'activescope': '3 National'},
+                  'country': 'United Kingdom (EU)', 'activescope': '3 National','eventid': evid},
                  {
                      'questiontext': r'Is the United States a corruption as alleged at http://www.ted.com/talks/lawrence_lessig_we_the_people_and_the_republic_we_must_reclaim.html ?',
                      'answers': ["Yes", "No"], 'urgency': 7, 'importance': 7, 'category': 'Organisation',
-                     'continent': 'North America (NA)', 'country': 'United States (NA)', 'activescope': '3 National'},
+                     'continent': 'North America (NA)', 'country': 'United States (NA)', 'activescope': '3 National','eventid': evid},
                  {
                      'questiontext': r'The distribution of wealth on the planet is radically different than that predicted by micro-economic theory.  The question therefore arises does acquisition of great wealth require exploitation of others?',
                      'numanswers': 3, 'answers': ["Yes", "No", "Usually"], 'urgency': 4, 'importance': 4,
-                     'category': 'Strategy'},
+                     'category': 'Strategy','eventid': evid},
                  {'qtype': 'action',
                   'questiontext': r'Daylight saving time should operate all year in Europe to reduce accidents and CO2 emissions',
                   'numanswers': 2, 'answers': ['Approve', 'Disapprove', 'OK'], 'urgency': 8, 'importance': 9,
                   'category': 'Organisation', 'responsible': 'Jose Manuel Barroso', 'continent': 'Europe (EU)',
-                  'activescope': '2 Continental'},
+                  'activescope': '2 Continental','eventid': evid},
                  {'qtype': 'action', 'questiontext': r'The funding model for US politics must change', 'numanswers': 2,
                   'answers': ['Approve', 'Disapprove', 'OK'], 'urgency': 8, 'importance': 9, 'category': 'Organisation',
                   'responsible': 'Barrack Obama', 'continent': 'North America (NA)', 'country': 'United States (NA)',
-                  'activescope': '3 National'},
+                  'activescope': '3 National','eventid': evid},
                  {'qtype': 'action',
                   'questiontext': r'All African health centres and schools should get internet access to improve access and trust in the global knowledge base, this should be provided by leading pharmaceutical and technology companies working together',
                   'numanswers': 2, 'answers': ['Approve', 'Disapprove', 'OK'], 'urgency': 5, 'importance': 9,
                   'category': 'Healthcare', 'responsible': 'CEOs of leading pharma & IT Companies',
-                  'continent': 'Africa (AF)', 'activescope': '2 Continental'},
+                  'continent': 'Africa (AF)', 'activescope': '2 Continental','eventid': evid},
                  {'qtype': 'action',
                   'questiontext': r'A national solution to the problem of misfuelling cars with petrol instead of diesel should be establised in the UK the costs of this problem are  estimated at around $120M per year and magnets, RFID readers on fuel pumps, better fuel caps or some other agreed approach should be able to permanently eliminate this waste for less than half that cost',
                   'numanswers': 2, 'answers': ['Approve', 'Disapprove', 'OK'], 'urgency': 5, 'importance': 6,
                   'category': 'Organisation', 'responsible': 'CEOs of leading Auto & Oil Companies',
-                  'continent': 'Europe (EU)', 'country': 'United Kingdom (EU)', 'activescope': '3 National'}]
-
+                  'continent': 'Europe (EU)', 'country': 'United Kingdom (EU)', 'activescope': '3 National','eventid': evid}]
 
     insertlist = []
     for x in stdquests:
+        x['correctanstext'] = ''
         qtext = x['questiontext']
         q = 0
         if not request.env.web2py_runtime_gae:
@@ -368,7 +351,7 @@ def addothquests():
             #time.sleep(1)
         insertlist.append(q)
     #have assumed id of first action is 28 - this needs checked
-    stdlinks = [[8,9],[11,12]]
+    stdlinks = [[8, 9], [11, 12]]
 
     #then if we have inserted those questions we would create related link
     #
@@ -377,9 +360,6 @@ def addothquests():
         target_id = insertlist[x[1]]
         if source_id > 0 and target_id > 0:
             if db(db.questlink.sourceid == source_id and db.questlink.targetid == target_id).isempty():
-                db.questlink.insert(sourceid=source_id,targetid=target_id, createcount=1, deletecount=0)
+                db.questlink.insert(sourceid=source_id, targetid=target_id, createcount=1, deletecount=0)
 
     return dict(messagetext=messagetext)
-
-
-

@@ -19,6 +19,7 @@
 
 import datetime
 from plugin_hradio_widget import hradio_widget
+from plugin_range_widget import range_widget
 from plugin_haystack import Haystack, SimpleBackend, GAEBackend
 
 not_empty = IS_NOT_EMPTY()
@@ -70,34 +71,19 @@ db.define_table('question',
                 Field('contactmethod', 'string', requires=IS_IN_SET(['email', 'website']), default='email'),
                 Field('duedate', 'datetime', label='Due Date', default=(request.utcnow + datetime.timedelta(days=365))),
                 Field('achieved', 'integer', default=0),
-                Field('eventid', 'reference event', label='Event',default=db(db.event.event_name =='Unspecified').select(
-                    db.event.id).first().id),
+                Field('eventid', 'reference event', label='Event'),
                 Field('challenge', 'boolean', default=False),
                 Field('numcomments', 'integer', default=0, writable=False,
                       label='# of comments'), )  # numcomments not yet used
 
 if request.env.web2py_runtime_gae:
-    indsearch = Haystack(db.question, backend=GAEBackend)  # table to be indexed
-    indsearch.indexes('questiontext','category') # lets go with this for now - some issues here but
-                                                            #  questiontext never changes and category rarely and can do
-                                                            #  defined update if it does answertext didnt work as not
-                                                            # part of fieldset when record created
+    indsearch = Haystack(db.question, backend=GAEBackend, fieldtypes=('string','text','datetime','date','list:string'))  # table to be indexed
+    indsearch.indexes('questiontext', 'answers', 'category', 'continent', 'country', 'subdivision',
+                      'createdate','correctanstext','activescope','qtype','status')
 else:
     indsearch = Haystack(db.question)
     indsearch.indexes('questiontext','category')
 
-
-db.question.category.requires = IS_IN_SET(settings.categories)
-db.question.continent.requires = IS_IN_SET(settings.continents)
-db.question.activescope.requires = IS_IN_SET(settings.scopes)
-
-
-db.question.duedate.requires = IS_DATETIME_IN_RANGE(format=T('%Y-%m-%d %H:%M:%S'),
-                                                    minimum=datetime.datetime(2013, 1, 1, 10, 30),
-                                                    maximum=datetime.datetime(2030, 12, 31, 11, 45),
-                                                    error_message='must be YYYY-MM-DD HH:MM::SS!')
-
-db.question.respemail.requires = IS_EMPTY_OR(IS_EMAIL())
 
 #This table holds records for normal question answers and also for answering
 #challenges and actions - in fact no obvious reason to differentiate
@@ -113,8 +99,10 @@ db.define_table('userquestion',
                 Field('answer', 'integer', default=0, requires=IS_IN_SET([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
                       label='My Answer'),
                 Field('reject', 'boolean'),
-                Field('urgency', 'integer', default=5, requires=IS_IN_SET([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])),
-                Field('importance', 'integer', default=5, requires=IS_IN_SET([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])),
+                Field('urgency', 'integer', default=5, requires=IS_INT_IN_RANGE(1, 10,
+                       error_message='Must be between 1 and 10'), widget=range_widget),
+                Field('importance', 'integer', default=5, requires=IS_INT_IN_RANGE(1, 10,
+                       error_message='Must be between 1 and 10'), widget=range_widget),
                 Field('score', 'integer', writable='False'),
                 Field('answerreason', 'text', label='Reasoning'),
                 Field('ansdate', 'datetime', default=request.now, writable=False, readable=False),
@@ -131,10 +119,6 @@ db.define_table('userquestion',
 #suggest using this to stop unnecessary indices on gae but doesn't work elsewhere so need to fix somehow
 #,custom_qualifier={'indexed':False} think - retry this later
 #db.table.field.extra = {} looks to be the way to do this in an if gae block
-
-db.userquestion.category.requires = IS_IN_SET(settings.categories)
-db.userquestion.continent.requires = IS_IN_SET(settings.continents)
-db.userquestion.activescope.requires = IS_IN_SET(settings.scopes)
 
 db.define_table('questchallenge',
                 Field('questionid', 'reference question', writable=False, readable=False),
@@ -206,8 +190,6 @@ db.define_table('questcomment',
                 Field('usersreject', 'list:integer', writable=False, readable=False),
                 Field('commentdate', 'datetime', default=request.utcnow, writable=False, readable=False))
 
-
-
 #This table is never populated but holds settings and options for configuring
 #many of the displays of actions and questions
 
@@ -225,20 +207,6 @@ db.define_table('viewscope',
                 Field('searchstring', 'string', label='Search string'))
 
 
-#lets see how the input works first
-db.viewscope.category.requires = IS_IN_SET(settings.categories)
-db.viewscope.scope.requires = IS_IN_SET(settings.scopes)
-db.viewscope.continent.requires = IS_IN_SET(settings.continents)
-db.viewscope.sortorder.requires = IS_IN_SET(['1 Priority', '2 Due Date', '3 Resolved Date', '4 Submit Date',
-                                             '5 Responsible'])
-db.viewscope.qsortorder.requires = IS_IN_SET(['1 Priority', '2 Resolved Date', '3 Submit Date'])
-db.viewscope.asortorder.requires = IS_IN_SET(['1 Answer Date', '2 Resolved Date', '3 Category'])
-db.viewscope.scope.widget = hradio_widget
-db.viewscope.sortorder.widget = hradio_widget
-db.viewscope.searchstring.requires = IS_NOT_EMPTY()
-db.viewscope.qsortorder.widget = hradio_widget
-db.viewscope.asortorder.widget = hradio_widget
-
 #This contains two standard messages one for general objective and a second
 #for specific action which someone is responsible for
 db.define_table('message', Field('msgtype', 'string'),
@@ -251,3 +219,59 @@ db.define_table('eventmap',
     Field('xpos', 'double', default=0.0, label='xcoord'),
     Field('ypos', 'double', default=0.0, label='ycoord'))
 
+#This caching doesnt appear to work - need to review tomorrow
+#if (not INIT) or INIT.website_init is False:
+if (not INIT) or INIT.website_init is False:
+    #no caching until this is true
+    db.auth_user.exclude_categories.requires = IS_EMPTY_OR(IS_IN_DB(db, 'category.cat_desc', multiple=True))
+    db.question.category.requires = IS_IN_DB(db, 'category.cat_desc')
+    db.auth_user.continent.requires = IS_IN_DB(db, 'continent.continent_name')
+    db.question.continent.requires = IS_IN_DB(db, 'continent.continent_name')
+    db.location.continent.requires = IS_IN_DB(db, 'continent.continent_name')
+    db.viewscope.category.requires = IS_IN_DB(db, 'category.cat_desc')
+    db.viewscope.continent.requires = IS_IN_DB(db, 'continent.continent_name')
+    db.userquestion.category.requires = IS_IN_DB(db, 'category.cat_desc')
+    db.userquestion.continent.requires = IS_IN_DB(db, 'continent.continent_name')
+else:
+    db.auth_user.exclude_categories.requires = IS_EMPTY_OR(IS_IN_DB(db, 'category.cat_desc', cache=(cache.ram,3600), multiple=True))
+    db.question.category.requires = IS_IN_DB(db, 'category.cat_desc', cache=(cache.ram,3600))
+    db.auth_user.continent.requires = IS_IN_DB(db, 'continent.continent_name', cache=(cache.ram,3600))
+    db.question.continent.requires = IS_IN_DB(db, 'continent.continent_name', cache=(cache.ram,3600))
+    db.location.continent.requires = IS_IN_DB(db, 'continent.continent_name', cache=(cache.ram,3600))
+    db.viewscope.category.requires = IS_IN_DB(db, 'category.cat_desc', cache=(cache.ram,3600))
+    db.viewscope.continent.requires = IS_IN_DB(db, 'continent.continent_name', cache=(cache.ram,3600))
+    db.userquestion.category.requires = IS_IN_DB(db, 'category.cat_desc', cache=(cache.ram,3600))
+    db.userquestion.continent.requires = IS_IN_DB(db, 'continent.continent_name', cache=(cache.ram,3600))
+
+db.userquestion.activescope.requires = IS_IN_SET(settings.scopes)
+db.question.activescope.requires = IS_IN_SET(settings.scopes)
+#line below commented out to see if generaes a query
+#db.location.location_name.requires = [not_empty, IS_NOT_IN_DB(db, 'location.location_name')]
+db.location.addrurl.requires = IS_EMPTY_OR(IS_URL())
+db.event.eventurl.requires = IS_EMPTY_OR(IS_URL())
+db.event.event_name.requires = IS_NOT_IN_DB(db, 'event.event_name')
+db.event.startdatetime.requires = IS_DATETIME_IN_RANGE(format=T('%Y-%m-%d %H:%M:%S'),
+                                                       minimum=datetime.datetime(2014, 6, 15, 00, 00),
+                                                       maximum=datetime.datetime(2021, 12, 31, 23, 59),
+                                                       error_message='must be YYYY-MM-DD HH:MM::SS!')
+db.event.enddatetime.requires = IS_DATETIME_IN_RANGE(format=T('%Y-%m-%d %H:%M:%S'),
+                                                     minimum=datetime.datetime(2014, 6, 15, 00, 00),
+                                                     maximum=datetime.datetime(2021, 12, 31, 23, 59),
+                                                     error_message='must be YYYY-MM-DD HH:MM::SS!')
+
+db.question.duedate.requires = IS_DATETIME_IN_RANGE(format=T('%Y-%m-%d %H:%M:%S'),
+                                                    minimum=datetime.datetime(2013, 1, 1, 10, 30),
+                                                    maximum=datetime.datetime(2030, 12, 31, 11, 45),
+                                                    error_message='must be YYYY-MM-DD HH:MM::SS!')
+
+db.question.respemail.requires = IS_EMPTY_OR(IS_EMAIL())
+db.viewscope.scope.requires = IS_IN_SET(settings.scopes)
+db.viewscope.sortorder.requires = IS_IN_SET(['1 Priority', '2 Due Date', '3 Resolved Date', '4 Submit Date',
+                                             '5 Responsible'])
+db.viewscope.qsortorder.requires = IS_IN_SET(['1 Priority', '2 Resolved Date', '3 Submit Date'])
+db.viewscope.asortorder.requires = IS_IN_SET(['1 Answer Date', '2 Resolved Date', '3 Category'])
+db.viewscope.scope.widget = hradio_widget
+db.viewscope.sortorder.widget = hradio_widget
+db.viewscope.searchstring.requires = IS_NOT_EMPTY()
+db.viewscope.qsortorder.widget = hradio_widget
+db.viewscope.asortorder.widget = hradio_widget
